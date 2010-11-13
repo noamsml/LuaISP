@@ -2,29 +2,75 @@
 
 type_sexp, type_ident, type_num, type_str = 1,2,3,4
 
-function tokenstream(str)
+function stringstream(str)
 	local index = 1
+	return function()
+		if index > str:len() then
+			return nil
+		end
+		
+		index = index + 1
+		
+		return str:sub(index-1, index-1)
+	end
+end
+
+function tokenstream(getchar)
+	local a = nil
 	local singles = {["("] = true, [")"] = true, ["'"] = true}
 	local delims = {[" "] = true, ["\t"] = true, ["\n"] = true}
 	
+	a = getchar()
 	return function ()
-		if index > str:len() then return nil end
-		local a
-		repeat
-			a = str:sub(index,index)
-			index = index + 1
-		until (not delims[a]) or (index > str:len())
+		local retval
 		
-		if delims[a] then return nil end -- trailing whitespace what what
-		
-		if singles[a] then return a end
-		
-		while not (delims[str:sub(index,index)] or singles[str:sub(index,index)] or (index > str:len())) do
-			a = a .. str:sub(index,index)
-			index = index + 1
+		while a and delims[a] do
+			a = getchar()
 		end
 		
-		return a
+		if not a then return nil end -- trailing whitespace what what
+		
+		if singles[a] then 
+			local b = a
+			a = getchar()
+			return b
+		end
+		
+		--string
+		if a == "\"" then
+			retval = a
+			a = getchar()
+			while a ~= "\"" do
+				if not a then error "Mismatched quotes" end
+				retval = retval .. a
+				if a == "\\" then
+					a = getchar()
+					if not a then error "Mismatched quotes" end
+					retval = retval .. a
+				end
+				a = getchar()
+			end
+			retval = retval .. a
+			a = getchar()
+			return retval
+		end
+		
+		
+		--identifier/number
+		retval = a
+		
+		a = getchar()
+		while a and not (delims[a] or singles[a]) do
+			retval = retval .. a
+			a = getchar()
+		end
+		
+		--"nullify" a
+		if not singles[a] then
+			a = getchar()
+		end
+		
+		return retval
 	
 	end
 end
@@ -68,6 +114,21 @@ end
 function parse_identnum (str)
 	if str:find("^%d+$") then
 		return {dtype=type_num, num=tonumber(str)}
+	elseif str:sub(1,1) == "\"" then
+		bychar = stringstream(str)
+		bychar()
+		local retval = ""
+		local nextchar = bychar()
+		while nextchar ~= "\"" do
+			if nextchar == "\\" then
+				retval = retval .. bychar()
+			else
+				retval = retval .. nextchar
+			end
+			
+			nextchar = bychar()
+		end
+		return {dtype=type_str, str=retval}
 	else
 		return {dtype=type_ident, ident=str}
 	end
@@ -116,6 +177,8 @@ exec = function (sexp)
 			return _G[sexp.ident]
 		elseif sexp.dtype == type_num then
 			return sexp.num
+		elseif sexp.dtype == type_str then
+			return sexp.str
 		elseif sexp.dtype == type_sexp then
 			func = exec(sexp.car)
 			
@@ -155,4 +218,6 @@ tblmassapply = function (expr)
 	return rval
 end
 
-print(exec(parse_sexp(tokenstream("(print 2 7)"), false)))
+print(exec(parse_sexp(tokenstream(stringstream("\"hello \\\"world\"")), false)))
+
+
