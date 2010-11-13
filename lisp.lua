@@ -15,6 +15,10 @@ function stringstream(str)
 	end
 end
 
+function readonefrominput()
+	return io.read(1)
+end
+
 function tokenstream(getchar)
 	local a = nil
 	local singles = {["("] = true, [")"] = true, ["'"] = true}
@@ -187,6 +191,7 @@ exec = function (sexp)
 		end
 	end
 
+
 apply = function (expr, rest)
 			if not type(expr) == "function" then
 				error("Not a function")
@@ -218,6 +223,9 @@ tblmassapply = function (expr)
 	return rval
 end
 
-print(exec(parse_sexp(tokenstream(stringstream("\"hello \\\"world\"")), false)))
+a = tokenstream(readonefrominput)
+while true do
+	exec(parse_sexp(a, true))
+end	
 
 
