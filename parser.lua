@@ -1,7 +1,7 @@
 require "import"
 
 function pkg_init(LispParser)
-	LispParser.type_sexp, LispParser.type_ident, LispParser.type_data = 1,2,3
+	LispParser.type_sexp, LispParser.type_ident, LispParser.type_data  = 1,2,3
 
 	--for brevity's sake
 	local type_sexp, type_ident, type_data = 1,2,3
