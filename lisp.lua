@@ -1,5 +1,6 @@
-local LispParser = require "parser"
-local LispExecutor = require "executor"
+require "import"
+local LispParser = import "parser"
+local LispExecutor = import "executor"
 
 --global functions
 
