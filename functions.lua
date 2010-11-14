@@ -77,17 +77,32 @@ function pkg_init(LispFunctions)
 								return rval
 							end
 						end}
+						
 	LispFunctions.set = {fun = function(environ, rest)
 								assert(type(rest.car) == "table" and rest.car.dtype == LispParser.type_ident)
 								environ[rest.car.ident] = LispExecutor.exec(rest.cdr.car, environ)
 								return environ[rest.car.ident]
 						end}
+						
+	LispFunctions["if"] = {fun = function(environ, rest)
+								if (LispExecutor.exec(rest.car, environ)) then
+									return LispExecutor.exec(rest.cdr.car, environ)
+								elseif rest.cdr.cdr then
+									return LispExecutor.exec(rest.cdr.cdr.car, environ)
+								end
+								
+								return nil
+						end}
 	setmetatable(LispFunctions.quot, LispFunctions.MetaFunction)
 	setmetatable(LispFunctions.lambda, LispFunctions.MetaFunction)
 	setmetatable(LispFunctions.set, LispFunctions.MetaFunction)
+	setmetatable(LispFunctions["if"], LispFunctions.MetaFunction)
 	
 	
-	LispFunctions.Null = {}
+	
+	
+	LispFunctions["true"] = true
+	LispFunctions["false"] = false
 	
 	
 	setmetatable(LispFunctions, {__index = getfenv(1)});
