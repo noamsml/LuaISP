@@ -48,6 +48,7 @@ function pkg_init(LispExecutor)
 		if sexp.dtype == LispParser.type_data then
 			return sexp.data
 		end
+		return sexp
 	end
 
 

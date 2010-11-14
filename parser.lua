@@ -100,7 +100,7 @@ function pkg_init(LispParser)
 				if not expected_cparen then error("No close paren expected") else return nil end
 			elseif tok1 == "'" then
 				return { dtype = type_sexp, car = {dtype = type_ident, ident = "quot"}, 
-						cdr = parse_sexp(tstr_iter) }
+						cdr = {dtype = type_sexp, car = parse_sexp(tstr_iter), cdr = nil}}
 			elseif tok1 == "(" then
 				local rval = {dtype = type_sexp, car=nil, cdr=nil}
 				local parsed_sexp

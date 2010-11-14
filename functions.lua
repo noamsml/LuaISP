@@ -1,3 +1,4 @@
+require "import"
 local LispParser = import "parser"
 local LispExecutor = import "executor"
 
@@ -49,8 +50,35 @@ function pkg_init(LispFunctions)
 		return rval
 	end
 	
+	LispFunctions.eq = function(a,b)
+						return a == b
+					end
+	
+	function LispFunctions.eqv(a,b)
+			a,b = LispExecutor.apply_literal(a), LispExecutor.apply_literal(b)
+			if type(a) ~= type(b) then
+				return false
+			elseif type(a) == "table" and a.dtype ~= b.dtype then
+				return false
+			elseif type(a) == "table" then
+				
+				if a.dtype == LispParser.type_ident then
+					return a.ident == b.ident
+				elseif a.dtype == LispParser.type_sexp then
+					
+					if not LispFunctions.eqv(a.car, b.car) then
+						return false
+					else
+						return LispFunctions.eqv(a.cdr, b.cdr)
+					end
+				end
+			end
+			
+			return a == b
+	end
+	
 	LispFunctions.quot = {fun = function(environ, rest)
-							return rest
+							return LispExecutor.apply_literal(rest.car)
 						end}
 	setmetatable(LispFunctions.quot, LispFunctions.MetaFunction)
 	
@@ -93,10 +121,19 @@ function pkg_init(LispFunctions)
 								
 								return nil
 						end}
+	LispFunctions["while"] = {fun = function(environ, rest)
+								local rval
+								while (LispExecutor.exec(rest.car, environ)) do
+									rval = LispExecutor.exec(rest.cdr.car, environ)
+								end
+								
+								return rval
+						end}
 	setmetatable(LispFunctions.quot, LispFunctions.MetaFunction)
 	setmetatable(LispFunctions.lambda, LispFunctions.MetaFunction)
 	setmetatable(LispFunctions.set, LispFunctions.MetaFunction)
 	setmetatable(LispFunctions["if"], LispFunctions.MetaFunction)
+	setmetatable(LispFunctions["while"], LispFunctions.MetaFunction)
 	
 	
 	
