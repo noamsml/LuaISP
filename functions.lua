@@ -141,6 +141,12 @@ function pkg_init(LispFunctions)
 	LispFunctions["true"] = true
 	LispFunctions["false"] = false
 	
+	LispFunctions["not"] = function(a) return not a end
+	LispFunctions["and"] = function(a,b) return a and b end
+	LispFunctions["or"] = function(a,b) return a or b end
+	
+	-- HACK
+	LispFunctions["do"] = function(...) return arg[table.getn(arg)] end
 	
 	setmetatable(LispFunctions, {__index = getfenv(1)});
 end
