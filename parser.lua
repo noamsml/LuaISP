@@ -26,8 +26,6 @@ local function pkg_init(LispParser)
 		return function () return file:read(1) end
 	end
 
-
-
 	function LispParser.parse (stream)
 		local tokenstream, parse_identnum, parse_sexp
 		tokenstream = function (getchar)
@@ -95,9 +93,9 @@ local function pkg_init(LispParser)
 			local tok1 = tstr_iter()
 			
 			if tok1 == nil then
-				if expected_cparen then error("Close paren expected") else return nil end 
+				if expected_cparen then error("Close paren expected") else return nil, false end 
 			elseif tok1 == ")" then
-				if not expected_cparen then error("No close paren expected") else return nil end
+				if not expected_cparen then error("No close paren expected") else return nil, false end
 			elseif tok1 == "'" then
 				return LispSexp.make_sexp(LispSexp.make_ident("quot"), parse_sexp(tstr_iter))
 			elseif tok1 == "(" then
@@ -107,19 +105,19 @@ local function pkg_init(LispParser)
 				
 				rval.car = parse_sexp(tstr_iter, true)
 				
-				if not rval.car then return rval end
+				if not rval.car then return rval, true end
 				
 				while true do
 					parsed_sexp = parse_sexp(tstr_iter, true)
 					if not parsed_sexp then
-						return rval
+						return rval, true
 					else
 						curptr.cdr = LispSexp.make_sexp(parsed_sexp)
 						curptr = curptr.cdr
 					end
 				end
 			else 
-				return parse_identnum(tok1)
+				return parse_identnum(tok1), true
 			end
 		end
 
