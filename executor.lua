@@ -2,8 +2,10 @@ require "import"
 local tblmassapply
 local LispParser = import "parser" --yay redundancy
 local LispFunctions = import "functions"
+local LispSexp = import "Sexp"
 
-function pkg_init(LispExecutor)
+
+local function pkg_init(LispExecutor)
 
 
 	LispExecutor.RunFile = function (file, interactive)
@@ -32,30 +34,23 @@ function pkg_init(LispExecutor)
 	LispExecutor.exec = function (sexp, environ)
 			if sexp == nil then
 				return nil
-			elseif sexp.dtype == LispParser.type_ident then
+			elseif LispSexp.is_ident(sexp) then
 				return environ[sexp.ident]
-			elseif sexp.dtype == LispParser.type_data then
-				return sexp.data
-			elseif sexp.dtype == LispParser.type_sexp then
+			elseif LispSexp.is_sexp(sexp) then
 				func = LispExecutor.exec(sexp.car, environ)
 				return LispExecutor.apply(func, sexp.cdr, environ)
+			else
+				return sexp
 			end
 		end
 	
-	LispExecutor.apply_literal = function (sexp)
-		if sexp == nil then return nil end
-		
-		if sexp.dtype == LispParser.type_data then
-			return sexp.data
-		end
-		return sexp
-	end
+
 
 
 	LispExecutor.apply = function (expr, rest, environ)
 				if type(expr) == "function" then
 					return  expr(unpack(tblmassapply(rest, environ)))
-				elseif type(expr) == "table" and getmetatable(expr) == LispFunctions.MetaFunction then
+				elseif LispSexp.is_metafun(expr) then
 					return expr.fun(environ, rest)
 				else
 					error("Not a function or metafunction")

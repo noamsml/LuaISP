@@ -1,12 +1,12 @@
 require "import"
+local LispSexp = import "Sexp"
 
-function pkg_init(LispParser)
-	LispParser.type_sexp, LispParser.type_ident, LispParser.type_data  = 1,2,3
+local function pkg_init(LispParser)
 
 	--for brevity's sake
 	local type_sexp, type_ident, type_data = 1,2,3
 
-
+	
 
 
 	function LispParser.stringstream(str)
@@ -99,10 +99,9 @@ function pkg_init(LispParser)
 			elseif tok1 == ")" then
 				if not expected_cparen then error("No close paren expected") else return nil end
 			elseif tok1 == "'" then
-				return { dtype = type_sexp, car = {dtype = type_ident, ident = "quot"}, 
-						cdr = {dtype = type_sexp, car = parse_sexp(tstr_iter), cdr = nil}}
+				return LispSexp.make_sexp(LispSexp.make_ident("quot"), parse_sexp(tstr_iter))
 			elseif tok1 == "(" then
-				local rval = {dtype = type_sexp, car=nil, cdr=nil}
+				local rval = LispSexp.make_sexp()
 				local parsed_sexp
 				local curptr = rval
 				
@@ -115,9 +114,8 @@ function pkg_init(LispParser)
 					if not parsed_sexp then
 						return rval
 					else
-						curptr.cdr = {dtype = type_sexp, car=nil, cdr=nil}
+						curptr.cdr = LispSexp.make_sexp(parsed_sexp)
 						curptr = curptr.cdr
-						curptr.car = parsed_sexp
 					end
 				end
 			else 
@@ -127,7 +125,7 @@ function pkg_init(LispParser)
 
 		parse_identnum = function (str)
 			if str:find("^%d+$") then
-				return {dtype=type_data, data=tonumber(str)}
+				return tonumber(str)
 			elseif str:sub(1,1) == "\"" then
 				bychar = LispParser.stringstream(str)
 				bychar()
@@ -142,9 +140,9 @@ function pkg_init(LispParser)
 					
 					nextchar = bychar()
 				end
-				return {dtype=type_data, data=retval}
+				return retval
 			else
-				return {dtype=type_ident, ident=str}
+				return LispSexp.make_ident(str)
 			end
 		end
 		
