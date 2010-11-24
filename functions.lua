@@ -142,6 +142,27 @@ local function pkg_init(LispFunctions)
 						end )
 						
 	
+	LispFunctions.lua = LispSexp.METAFUN ( function(environ, rest)
+							local newenv = {}
+							setmetatable(newenv, {--ARE YOU READY?
+							__index = environ,
+							__newindex = function(t,i,v)
+									local newt = getmetatable(t).__index 
+									while newt ~= _G and newt[i] == nil do
+										newt = getmetatable(newt).__index
+									end
+									newt[i] = v
+							end
+							})
+							
+							code_data = loadstring(LispExecutor.exec(rest.car, environ)) --The exec is mostly "just in case"
+							
+							if code_data == nil then error "Bad lua code" end
+							
+							setfenv(code_data, newenv)
+							return code_data()
+					end)
+	
 	
 	
 	LispFunctions["true"] = true

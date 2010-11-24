@@ -1,9 +1,8 @@
 require "import"
-local LispParser = import "parser"
-local LispExecutor = import "executor"
+local Lisp = import "lispcode"
 
 --global functions
 
 
-LispExecutor.RunFile(io.input(), true)
+Lisp.RunFile(io.input(), true)
 

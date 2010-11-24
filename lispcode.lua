@@ -21,7 +21,7 @@ local function pkg_init(Lisp)
 
 	end
 
-	Lisp.require = function (file, interactive)
+	Lisp.RunFile = function (file, interactive)
 		local newenv = {}
 		setmetatable(newenv, {__index = LispFunctions})
 		local fstream = LispParser.filestream(file)
