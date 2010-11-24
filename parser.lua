@@ -129,14 +129,14 @@ local function pkg_init(LispParser)
 				local rval = LispSexp.make_sexp()
 				local parsed_sexp
 				local curptr = rval
+				local cont
+				rval.car, cont = parse_sexp(tstr_iter, true)
 				
-				rval.car = parse_sexp(tstr_iter, true)
-				
-				if not rval.car then return nil, true end
+				if not cont then return nil, true end
 				
 				while true do
-					parsed_sexp = parse_sexp(tstr_iter, true)
-					if not parsed_sexp then
+					parsed_sexp, cont = parse_sexp(tstr_iter, true)
+					if not cont then
 						return rval, true
 					else
 						curptr.cdr = LispSexp.make_sexp(parsed_sexp)
@@ -172,6 +172,8 @@ local function pkg_init(LispParser)
 				else
 					return str:sub(2)
 				end
+			elseif str == "nil" then
+				return nil
 			else
 				return LispSexp.make_ident(str)
 			end
