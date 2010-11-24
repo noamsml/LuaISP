@@ -4,7 +4,7 @@ Lisp = import "lispcode"
 
 Lisp.code [=[
 		(defun (hello x) (print x))
-		(defun (throwback v) (set l 22) (lua [[print v+l]]))
+		(defun (throwback v) (set l 22) (lua [[print(v+l)]]))
 ]=]
 
 

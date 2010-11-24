@@ -38,7 +38,7 @@ local function pkg_init(LispParser)
 				local retval
 				
 				--print(":: " .. a)
-				while (not a) or delims[a] do
+				while a and delims[a] do
 					a = getchar()
 				end
 				
