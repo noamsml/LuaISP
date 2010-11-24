@@ -101,10 +101,26 @@ local function pkg_init(LispFunctions)
 						end )
 						
 	LispFunctions.set = LispSexp.METAFUN( function(environ, rest)
-								assert(type(rest.car) == "table" and rest.car.dtype == LispParser.type_ident)
+								assert(LispSexp.is_ident(rest.car))
 								environ[rest.car.ident] = LispExecutor.exec(rest.cdr.car, environ)
 								return environ[rest.car.ident]
 						end )
+	LispFunctions.setg = LispSexp.METAFUN( function(environ, rest)
+								assert(LispSexp.is_ident(rest.car))
+								_G[rest.car.ident] = LispExecutor.exec(rest.cdr.car, environ)
+								return _G[rest.car.ident]
+						end )
+						
+	LispFunctions.defun = LispSexp.METAFUN( function(environ, rest)
+								assert(LispSexp.is_sexp(rest.car) and LispSexp.is_ident(rest.car.car) )
+								_G[rest.car.car.ident] = 
+									LispFunctions.lambda.fun(environ, LispSexp.make_sexp(rest.car.cdr, rest.cdr))
+								return _G[rest.car.car.ident]
+						end )
+						
+	LispFunctions.cons = function(car, cdr)
+					return LispSexp.make_sexp(car, cdr)
+	end
 						
 	LispFunctions["if"] = LispSexp.METAFUN( function(environ, rest)
 								if (LispExecutor.exec(rest.car, environ)) then
