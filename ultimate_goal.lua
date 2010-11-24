@@ -2,11 +2,12 @@
 require "import"
 Lisp = import "lispcode"
 
-Lisp.code [[
+Lisp.code [=[
 		(defun (hello x) (print x))
-]]
---		(defun (throwback v) (set l 22) (lua [[print v+l]]))
+		(defun (throwback v) (set l 22) (lua [[print v+l]]))
+]=]
+
 
 
 hello(13)
---throwback(12)
+throwback(12)

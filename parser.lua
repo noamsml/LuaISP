@@ -80,6 +80,8 @@ local function pkg_init(LispParser)
 						a = getchar()
 					end
 					
+					
+					
 					while a and lv_out ~= lv_in  do
 						if a == "]" then
 							lv_out = lv_out + 1
