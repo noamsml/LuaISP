@@ -175,6 +175,39 @@ local function pkg_init(LispFunctions)
 	-- HACK
 	LispFunctions["do"] = function(...) return arg[table.getn(arg)] end
 	
+	LispFunctions.is_list = LispSexp.is_sexp
+	
+	LispFunctions.is_ident = LispSexp.is_ident
+	
+	LispFunctions.is_metafun = LispSexp.is_metafun
+	
+	LispFunctions.is_string = function (m) return (type(m) == "string") end
+	
+	LispFunctions.is_num = function (m) return (type(m) == "number") end
+	
+	LispFunctions.display = function (m)
+		local retval = ""
+		if LispSexp.is_sexp(m) then
+			retval = "("
+			while m.cdr do
+				retval = retval .. LispFunctions.display(m.car) .. " "
+				m = m.cdr
+			end
+			retval = retval .. LispFunctions.display(m.car) .. ")"
+			return retval
+		elseif LispSexp.is_ident(m) then
+			return m.ident
+		elseif type(m) == "number" then
+			return tostring(m) --yes, I'm being lazy here
+		elseif type(m) == "string" then
+			return "\"" .. m:gsub("[\\\"]", "\\%1") .. "\""
+		elseif m == nil then
+			return "()"
+		else
+			return "<" .. tostring(m) .. ">"
+		end
+	end
+	
 	setmetatable(LispFunctions, {__index = getfenv(1)});
 end
 

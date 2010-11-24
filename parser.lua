@@ -124,7 +124,7 @@ local function pkg_init(LispParser)
 			elseif tok1 == ")" then
 				if not expected_cparen then error("No close paren expected") else return nil, false end
 			elseif tok1 == "'" then
-				return LispSexp.make_sexp(LispSexp.make_ident("quot"), parse_sexp(tstr_iter))
+				return LispSexp.make_sexp(LispSexp.make_ident("quot"), LispSexp.make_sexp(parse_sexp(tstr_iter), nil)), true
 			elseif tok1 == "(" then
 				local rval = LispSexp.make_sexp()
 				local parsed_sexp
@@ -132,7 +132,7 @@ local function pkg_init(LispParser)
 				
 				rval.car = parse_sexp(tstr_iter, true)
 				
-				if not rval.car then return rval, true end
+				if not rval.car then return nil, true end
 				
 				while true do
 					parsed_sexp = parse_sexp(tstr_iter, true)

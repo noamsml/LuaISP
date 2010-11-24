@@ -35,7 +35,7 @@ local function pkg_init(Lisp)
 			
 			result = LispExecutor.exec(parsed, newenv)
 			if (interactive) then 
-				print(result)
+				print(LispFunctions.display(result))
 				interactive:write(">>> ")
 				interactive:flush()
 			end
