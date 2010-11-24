@@ -8,13 +8,13 @@ local function pkg_init(Lisp)
 	Lisp.code = function(str)
 		local newenv = {}
 		setmetatable(newenv, {__index = LispFunctions})
-		local val = LispParser.stringstream(str)
-		local parsed,cont = LispParser.parse(val)
+		local parser = LispParser.parse(LispParser.stringstream(str))
+		local parsed,cont = parser()
 		local result
 		
 		while cont do
 			result = LispExecutor.exec(parsed, newenv)
-			parsed,cont = LispParser.parse(val)
+			parsed,cont = parser()
 		end
 		
 		return result
@@ -24,22 +24,22 @@ local function pkg_init(Lisp)
 	Lisp.RunFile = function (file, interactive)
 		local newenv = {}
 		setmetatable(newenv, {__index = LispFunctions})
-		local fstream = LispParser.filestream(file)
+		local parser = LispParser.parse(LispParser.filestream(file))
 		if (interactive) then 
-			io.output():write(">>> ")
-			io.output():flush()
+			interactive:write(">>> ")
+			interactive:flush()
 		end
-		local parsed, cont = LispParser.parse(fstream)
+		local parsed, cont = parser()
 		local result = nil
 		while cont do
 			
 			result = LispExecutor.exec(parsed, newenv)
 			if (interactive) then 
 				print(result)
-				io.output():write(">>> ")
-				io.output():flush()
+				interactive:write(">>> ")
+				interactive:flush()
 			end
-			parsed,cont = LispParser.parse(fstream)
+			parsed,cont = parser()
 		end
 		return result
 	end

@@ -37,7 +37,8 @@ local function pkg_init(LispParser)
 			return function ()
 				local retval
 				
-				while a and delims[a] do
+				--print(":: " .. a)
+				while (not a) or delims[a] do
 					a = getchar()
 				end
 				
@@ -69,6 +70,34 @@ local function pkg_init(LispParser)
 				end
 				
 				
+				--or
+				if a == "[" then
+					local lv_in = 0
+					local lv_out = 0
+					retval = "["
+					while a == "[" do
+						lv_in =  lv_in + 1
+						a = getchar()
+					end
+					
+					while a and lv_out ~= lv_in  do
+						if a == "]" then
+							lv_out = lv_out + 1
+						else
+							while lv_out > 0 do
+								retval = retval .. "]"
+								lv_out = lv_out - 1
+							end
+							retval = retval .. a
+						end
+						a = getchar()
+					end
+				--	a = getchar()
+					return retval
+				end
+					
+				
+				
 				--identifier/number
 				retval = a
 				
@@ -78,20 +107,16 @@ local function pkg_init(LispParser)
 					a = getchar()
 				end
 				
-				--"nullify" a
-				if not singles[a] then
-					a = getchar()
-				end
+				
 				
 				return retval
-			
 			end
 		end
 
 
 		parse_sexp = function (tstr_iter, expected_cparen)
 			local tok1 = tstr_iter()
-			
+			--print(tok1) --TODO: tokenbug
 			if tok1 == nil then
 				if expected_cparen then error("Close paren expected") else return nil, false end 
 			elseif tok1 == ")" then
@@ -139,13 +164,22 @@ local function pkg_init(LispParser)
 					nextchar = bychar()
 				end
 				return retval
+			elseif str:sub(1,1) == "[" then
+				if str:sub(2,2) == "\n" then
+					return str:sub(3)
+				else
+					return str:sub(2)
+				end
 			else
 				return LispSexp.make_ident(str)
 			end
 		end
 		
 		
-		return parse_sexp(tokenstream(stream))
+		return function () 
+			local s = tokenstream(stream);  
+			return parse_sexp(s);
+		end
 	end
 end
 
