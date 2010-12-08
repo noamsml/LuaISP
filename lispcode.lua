@@ -43,7 +43,11 @@ local function pkg_init(Lisp)
 		end
 		return result
 	end
-
+	
+	
+	Lisp.require = function (fname)
+		return Lisp.RunFile(io.open(fname, "r"))
+	end
 end
 
 return pkg_init

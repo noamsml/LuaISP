@@ -121,6 +121,16 @@ local function pkg_init(LispFunctions)
 	LispFunctions.cons = function(car, cdr)
 					return LispSexp.make_sexp(car, cdr)
 	end
+	
+	LispFunctions.list = function(...)
+		local i = table.getn(arg)
+		local rval = nil
+		while i > 0 do
+			rval = LispSexp.make_sexp(arg[i], rval)
+			i = i - 1
+		end
+		return rval
+	end
 						
 	LispFunctions["if"] = LispSexp.METAFUN( function(environ, rest)
 								if (LispExecutor.exec(rest.car, environ)) then
@@ -206,6 +216,43 @@ local function pkg_init(LispFunctions)
 		else
 			return "<" .. tostring(m) .. ">"
 		end
+	end
+	
+	-- Yes, it's a metafunction; blame the use of environ
+	LispFunctions.exec = LispSexp.METAFUN( function (environ, rest) 
+		--Yo dawg, I heard you like evaluation, so I put evaluation in your evaluation so you can
+		--evaluate while you evaluate
+		return LispExecutor.exec(LispExecutor.exec(rest.car, environ), environ)
+	end )
+	
+	LispFunctions.apply = LispSexp.METAFUN(function (environ,rest) 
+		return LispExecutor.apply(LispExecutor.exec(rest.car,environ), 
+			LispExecutor.exec(rest.cdr.car, environ), environ)
+	end)
+	
+	LispFunctions.metafun = LispSexp.METAFUN;
+	
+	LispFunctions[":"] = function(a,b)
+		return a[b]
+	end
+	
+	LispFunctions[":="] = function(a,b,c)
+		a[b] = c
+	end
+	
+	LispFunctions["/"] = function(a,b)
+		return a/b
+	end
+	
+	LispFunctions["read"] = function(message)
+		if (message) then io.write(message) end
+		
+		local instream = LispParser.parse(LispParser.filestream(io.input()))
+		return instream()
+	end
+	
+	LispFunctions["newtable"] = function()
+		return {}
 	end
 	
 	setmetatable(LispFunctions, {__index = getfenv(1)});
