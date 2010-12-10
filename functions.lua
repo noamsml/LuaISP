@@ -102,21 +102,34 @@ local function pkg_init(LispFunctions)
 						
 	LispFunctions.set = LispSexp.METAFUN( function(environ, rest)
 								assert(LispSexp.is_ident(rest.car))
-								environ[rest.car.ident] = LispExecutor.exec(rest.cdr.car, environ)
-								return environ[rest.car.ident]
+								local subenv, finalstep = LispExecutor.resolve_id(rest.car.ident, environ)
+								subenv[finalstep] = LispExecutor.exec(rest.cdr.car, environ)
+								return subenv[finalstep]
 						end )
+						
+	LispFunctions.setl = LispSexp.METAFUN( function(environ, rest)
+								assert(LispSexp.is_ident(rest.car))
+								local subenv, finalstep = LispExecutor.resolve_id(rest.car.ident, LispFunctions)
+								subenv[finalstep] = LispExecutor.exec(rest.cdr.car, environ)
+								return subenv[finalstep]
+						end )
+
 	LispFunctions.setg = LispSexp.METAFUN( function(environ, rest)
 								assert(LispSexp.is_ident(rest.car))
-								_G[rest.car.ident] = LispExecutor.exec(rest.cdr.car, environ)
-								return _G[rest.car.ident]
+								local subenv, finalstep = LispExecutor.resolve_id(rest.car.ident, _G)
+								subenv[finalstep] = LispExecutor.exec(rest.cdr.car, environ)
+								return subenv[finalstep]
 						end )
 						
 	LispFunctions.defun = LispSexp.METAFUN( function(environ, rest)
 								assert(LispSexp.is_sexp(rest.car) and LispSexp.is_ident(rest.car.car) )
-								_G[rest.car.car.ident] = 
+								local subenv, finalstep = LispExecutor.resolve_id(rest.car.car.ident, _G)
+								subenv[finalstep] = 
 									LispFunctions.lambda.fun(environ, LispSexp.make_sexp(rest.car.cdr, rest.cdr))
-								return _G[rest.car.car.ident]
+								return subenv[finalstep]
 						end )
+						
+	
 						
 	LispFunctions.cons = function(car, cdr)
 					return LispSexp.make_sexp(car, cdr)
@@ -238,6 +251,7 @@ local function pkg_init(LispFunctions)
 	
 	LispFunctions[":="] = function(a,b,c)
 		a[b] = c
+		return c
 	end
 	
 	LispFunctions["/"] = function(a,b)
