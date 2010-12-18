@@ -12,8 +12,12 @@ Lisp.require("fname.luaisp")
 and then the functions defined there will integrate seamslessly with lua functions (and luaisp sexps will be easy to manipulate from within lua etc etc)
 
 ## todo ##
-1. BUG: Use of "unpack" means one cannot pass nil values safely to any function
-3. Use metatables to create methods to manipulate sexps easily from within lua
+### Roadmap to making an IRC bot in LuaISP ###
+1. Capacity to use $ to apply and create functions in object style
+2. Error capturing
+3. Other?
+
+### And other stuff ###
 4. ???
 5. PROFIT
 

@@ -102,31 +102,35 @@ local function pkg_init(LispFunctions)
 						
 	LispFunctions.set = LispSexp.METAFUN( function(environ, rest)
 								assert(LispSexp.is_ident(rest.car))
-								local subenv, finalstep = LispExecutor.resolve_id(rest.car.ident, environ)
-								subenv[finalstep] = LispExecutor.exec(rest.cdr.car, environ)
-								return subenv[finalstep]
+								local get,set = LispExecutor.resolve_id(rest.car.ident, environ)
+								local val = LispExecutor.exec(rest.cdr.car, environ)
+								set(val)
+								return val
 						end )
 						
 	LispFunctions.setl = LispSexp.METAFUN( function(environ, rest)
 								assert(LispSexp.is_ident(rest.car))
-								local subenv, finalstep = LispExecutor.resolve_id(rest.car.ident, LispFunctions)
-								subenv[finalstep] = LispExecutor.exec(rest.cdr.car, environ)
-								return subenv[finalstep]
+								local get,set = LispExecutor.resolve_id(rest.car.ident, LispFunctions)
+								local val = LispExecutor.exec(rest.cdr.car, environ)
+								set(val)
+								return val
 						end )
 
 	LispFunctions.setg = LispSexp.METAFUN( function(environ, rest)
 								assert(LispSexp.is_ident(rest.car))
-								local subenv, finalstep = LispExecutor.resolve_id(rest.car.ident, _G)
-								subenv[finalstep] = LispExecutor.exec(rest.cdr.car, environ)
-								return subenv[finalstep]
+								local get,set = LispExecutor.resolve_id(rest.car.ident, _G)
+								local val = LispExecutor.exec(rest.cdr.car, environ)
+								set(val)
+								return val
 						end )
 						
 	LispFunctions.defun = LispSexp.METAFUN( function(environ, rest)
 								assert(LispSexp.is_sexp(rest.car) and LispSexp.is_ident(rest.car.car) )
-								local subenv, finalstep = LispExecutor.resolve_id(rest.car.car.ident, _G)
-								subenv[finalstep] = 
+								local get,set = LispExecutor.resolve_id(rest.car.car.ident, _G)
+								local val = 
 									LispFunctions.lambda.fun(environ, LispSexp.make_sexp(rest.car.cdr, rest.cdr))
-								return subenv[finalstep]
+								set(val)
+								return val
 						end )
 						
 	

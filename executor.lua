@@ -11,9 +11,9 @@ local function pkg_init(LispExecutor)
 			if sexp == nil then
 				return nil
 			elseif LispSexp.is_ident(sexp) then
-				local subenv, finalstep = LispExecutor.resolve_id(sexp.ident, environ)
+				local get, set = LispExecutor.resolve_id(sexp.ident, environ)				
 				--print (subenv, finalstep)
-				return subenv[finalstep]
+				return get()
 			elseif LispSexp.is_sexp(sexp) then
 				func = LispExecutor.exec(sexp.car, environ)
 				return LispExecutor.apply(func, sexp.cdr, environ)
@@ -26,13 +26,43 @@ local function pkg_init(LispExecutor)
 		local dot = ident:find("[.]")
 		local olddot = 1
 		local subenv = environ
+		local finalstep
+		local get,set
+		
 		while dot do
 			subenv = subenv[ident:sub(olddot,dot-1)]
 			olddot = dot+1
 			dot = ident:find("[.]", olddot)
 		end
 		
-		return subenv, ident:sub(olddot)
+		finalstep = ident:sub(olddot)
+		local dolla = finalstep:find("[$]")
+		if not dolla then
+			get = function ()
+				return subenv[finalstep]
+			end
+			
+			set = function (val)
+				subenv[finalstep] = val
+			end
+			
+		else
+			subenv = subenv[finalstep:sub(1,dolla-1)]
+			finalstep = finalstep:sub(dolla+1)
+			get = function ()
+				-- BUG: This doesn't play nice with nil
+				return function(...)
+					return subenv[finalstep](subenv, unpack(arg))
+				end
+			end
+			
+			set = function(val)
+				error("Currently not supported :(")
+			end
+				
+		end
+		
+		return get,set
 	end
 	
 
