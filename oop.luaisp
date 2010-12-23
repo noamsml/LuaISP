@@ -34,7 +34,7 @@
 (setl instance 
 	(lambda (cl) 
 		(set rval (newenv cl))
-		(if cl.__init__ (rval$__init__))
+		(if cl.__init__ (apply rval.__init__ (cons rval #)))
 		rval
 	)
 )
