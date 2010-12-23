@@ -148,8 +148,7 @@ local function pkg_init(LispFunctions)
 						local capfun = LispExecutor.exec(rest.car, environ) -- capfun is first
 																	  -- because it's likely shorter
 						
-						--and for testing
-						print(LispFunctions.display(rest.cdr.car))
+						
 						local captured = function (...)
 							if (arg[1] == true) then return unpack(arg,2)
 							else return capfun(arg[2]) end
@@ -157,10 +156,12 @@ local function pkg_init(LispFunctions)
 						
 						return captured(pcall(function ()
 							local x = rest.cdr
+							local z = nil
 							while x do
-								LispExecutor.exec(x.car, environ) 
+								z = LispExecutor.exec(x.car, environ) 
 								x = x.cdr
 							end
+							return z
 						 end))
 														 
 	end )
