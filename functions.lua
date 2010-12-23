@@ -93,7 +93,10 @@ local function pkg_init(LispFunctions)
 								end
 								
 								while sexp do
+									--DEBUG
+									
 									rval = LispExecutor.exec(sexp.car, newenv)
+									
 									sexp = sexp.cdr
 								end
 								return rval

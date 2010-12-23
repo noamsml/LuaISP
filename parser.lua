@@ -149,7 +149,7 @@ local function pkg_init(LispParser)
 		end
 
 		parse_identnum = function (str)
-			if str:find("^%d+$") then
+			if str:find("^-?%d+[.]?%d*$") then
 				return tonumber(str)
 			elseif str:sub(1,1) == "\"" then
 				bychar = LispParser.stringstream(str)

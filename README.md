@@ -14,9 +14,9 @@ and then the functions defined there will integrate seamslessly with lua functio
 ## todo ##
 ### Roadmap to making an IRC bot in LuaISP ###
 1. Capacity to use $ to apply and create functions in object style -- DONE
-2. Error capturing -- DONE (?)
+2. Error capturing -- DONE 
 3. Handle multiple return values to/from lua functions gracefully -- DONE
-4. BUG: Lambda doesn't play nice with certain values (why?)
+4. BUG: Lambda doesn't play nice with negative numbers -- FIXED, TURNS OUT ALL OF LUAISP DIDN'T
 
 ### And other stuff ###
 4. ???
