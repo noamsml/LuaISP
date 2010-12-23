@@ -22,20 +22,28 @@ local function pkg_init(LispExecutor)
 			end
 		end
 		
-	LispExecutor.resolve_id = function (ident, environ)
+	
+	LispExecutor.parse_id  = function(ident, environ)
 		local dot = ident:find("[.]")
 		local olddot = 1
 		local subenv = environ
 		local finalstep
-		local get,set
-		
+
 		while dot do
 			subenv = subenv[ident:sub(olddot,dot-1)]
 			olddot = dot+1
 			dot = ident:find("[.]", olddot)
 		end
-		
 		finalstep = ident:sub(olddot)
+
+		return subenv,finalstep
+	end
+	
+	
+	LispExecutor.resolve_id = function (ident, environ)
+		local get,set
+		local subenv,finalstep = LispExecutor.parse_id(ident,environ)
+		
 		local dolla = finalstep:find("[$]")
 		if not dolla then
 			get = function ()

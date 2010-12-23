@@ -108,6 +108,8 @@ local function pkg_init(LispFunctions)
 								return val
 						end )
 						
+	
+						
 	LispFunctions.setl = LispSexp.METAFUN( function(environ, rest)
 								assert(LispSexp.is_ident(rest.car))
 								local get,set = LispExecutor.resolve_id(rest.car.ident, LispFunctions)
@@ -123,6 +125,49 @@ local function pkg_init(LispFunctions)
 								set(val)
 								return val
 						end )
+	
+	--REPACK VALUES USING MAGIC
+	LispFunctions.repack = LispSexp.METAFUN( function(environ, rest)
+							local data = function (...)
+								local x = rest.cdr
+								local i = 1
+								while x do
+									local get,set = LispExecutor.resolve_id(x.car.ident, LispFunctions)
+									set(arg[i])
+									i = i + 1
+									x = x.cdr
+								end
+								return i-1
+							end
+							
+							return data(LispExecutor.exec(rest.car, environ))
+							
+		end )
+	
+	LispFunctions["capture-error"] = LispSexp.METAFUN ( function(environ, rest)
+						local capfun = LispExecutor.exec(rest.car, environ) -- capfun is first
+																	  -- because it's likely shorter
+						
+						--and for testing
+						print(LispFunctions.display(rest.cdr.car))
+						local captured = function (...)
+							if (arg[1] == true) then return unpack(arg,2)
+							else return capfun(arg[2]) end
+						end
+						
+						return captured(pcall(function ()
+							local x = rest.cdr
+							while x do
+								LispExecutor.exec(x.car, environ) 
+								x = x.cdr
+							end
+						 end))
+														 
+	end )
+	
+	LispFunctions["return-multiple"] = function(...)
+		return unpack(arg)
+	end
 						
 	LispFunctions.defun = LispSexp.METAFUN( function(environ, rest)
 								assert(LispSexp.is_sexp(rest.car) and LispSexp.is_ident(rest.car.car) )
@@ -271,6 +316,10 @@ local function pkg_init(LispFunctions)
 	
 	LispFunctions["newtable"] = function()
 		return {}
+	end
+	
+	LispFunctions.parse_id = function(id,env)
+		return LispExecutor.parse_id (id.ident, env)
 	end
 	
 	setmetatable(LispFunctions, {__index = getfenv(1)});
