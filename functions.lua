@@ -299,10 +299,18 @@ local function pkg_init(LispFunctions)
 	LispFunctions.metafun = LispSexp.METAFUN;
 	
 	LispFunctions[":"] = function(a,b)
+		if LispFunctions.is_ident(b) then
+			b = b.ident
+		end
+		
 		return a[b]
 	end
 	
 	LispFunctions[":="] = function(a,b,c)
+		if LispFunctions.is_ident(b) then
+			b = b.ident
+		end
+		
 		a[b] = c
 		return c
 	end
@@ -325,6 +333,11 @@ local function pkg_init(LispFunctions)
 	LispFunctions.parse_id = function(id,env)
 		return LispExecutor.parse_id (id.ident, env)
 	end
+	
+	
+	LispFunctions.metafun = LispSexp.METAFUN
+	
+	LispFunctions.idstring = function (ident) return ident.ident end
 	
 	setmetatable(LispFunctions, {__index = getfenv(1)});
 end

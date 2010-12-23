@@ -3,12 +3,6 @@ local LispSexp = import "Sexp"
 
 local function pkg_init(LispParser)
 
-	--for brevity's sake
-	local type_sexp, type_ident, type_data = 1,2,3
-
-	
-
-
 	function LispParser.stringstream(str)
 		local index = 1
 		return function()

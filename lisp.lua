@@ -7,7 +7,7 @@ else Lisp.code [[
 	(print "Welcome to LuaISP! Please write \"quit\" to exit the interperter")
 	(setg quit (newtable))
 	(while (not (eq 
-		(set %% (capture-error (lambda (msg) (print msg) nil) (exec (read "input> ")) ) ) 
+		(set %% (capture-error print (exec (read "input> ")) ) ) 
 		
 		quit)) 
 		
