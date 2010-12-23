@@ -3,7 +3,7 @@
 	(set rval (newtable)) 
 	(set methods (cdr rest))
 	(set myenv (newenv environ)) [[not sure this is really needed]]
-	[[And yes, I make comments by inserting random strings into my code. I'm that ghetto.]]
+	[[And yes, I make comments by inserting random strings into my code. I'm that horrid.]]
 	
 	(while methods
 		
