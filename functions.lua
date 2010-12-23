@@ -118,6 +118,8 @@ local function pkg_init(LispFunctions)
 								local i = 1
 								local sexp = rest.cdr
 								local rval = nil
+								local restarg = nil
+								
 								setmetatable(newenv, {__index = environ})
 								while LispSexp.is_sexp(blah) and blah.car do
 									assert(LispSexp.is_ident(blah.car))  --"state of the art error handling" :P
@@ -125,6 +127,14 @@ local function pkg_init(LispFunctions)
 									i = i + 1
 									blah = blah.cdr
 								end
+								
+								--AND
+								local j = table.getn(arg)
+								while j >= i do
+										restarg = LispSexp.make_sexp(arg[j], restarg)
+										j = j - 1
+								end
+								newenv["#"] = restarg
 								
 								while sexp do
 									--DEBUG
