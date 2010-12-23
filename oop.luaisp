@@ -1,0 +1,42 @@
+(setl class (metafun (lambda (environ rest)
+	
+	(set rval (newtable)) 
+	(set methods (cdr rest))
+	(set myenv (newenv environ)) [[not sure this is really needed]]
+	[[And yes, I make comments by inserting random strings into my code. I'm that ghetto.]]
+	
+	(while methods
+		
+		(do
+			
+			(if (eqv (car (car methods)) 'method)
+				(do
+					(:= rval (car (car (cdr (car methods))))
+						(metacall lambda myenv 
+							(cons (cons 'self (cdr (car (cdr (car methods))))) (cdr (cdr (car methods))) )
+						)
+					)
+				)
+				(error "Only methods are allowed in class body")
+			)
+			
+			(set methods (cdr methods))
+		
+		)
+		
+	)
+	
+	
+	(:= environ (idstring (car rest)) rval)
+	
+	)) )
+	
+(setl instance 
+	(lambda (cl) 
+		(set rval (newenv cl))
+		(if cl.__init__ (rval$__init__))
+		rval
+	)
+)
+	
+nil

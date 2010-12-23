@@ -5,6 +5,33 @@ local LispSexp = import "Sexp"
 
 local function pkg_init(LispFunctions)
 	
+	-- temporarily moved from LispCode for convenience
+	
+	
+	LispFunctions["run-file"] = function (file)
+		local newenv = {}
+		setmetatable(newenv, {__index = LispFunctions})
+		local parser = LispParser.parse(LispParser.filestream(file))
+		local parsed, cont = parser()
+		local result = nil
+		while cont do
+			
+			result = LispExecutor.exec(parsed, newenv)
+			parsed,cont = parser()
+		end
+		return result
+	end
+	
+	
+	LispFunctions["require-lisp"] = function (fname)
+		return LispFunctions["run-file"](io.open(fname, "r"))
+	end
+	
+	
+	
+	
+	
+	
 	LispFunctions["+"] = function(...)
 				local rval = 0
 				for i,v in ipairs(arg) do
@@ -73,9 +100,16 @@ local function pkg_init(LispFunctions)
 			return a == b
 	end
 	
+	
 	LispFunctions.quot = LispSexp.METAFUN(  function(environ, rest)
 							return rest.car
 						end )
+	
+	LispFunctions.newenv = function (environ) 
+			local newenv = {}
+			setmetatable(newenv, {__index = environ})
+			return newenv
+	end
 	
 	LispFunctions.lambda = LispSexp.METAFUN( function(environ, rest)
 							return function(...)
@@ -336,6 +370,10 @@ local function pkg_init(LispFunctions)
 	
 	
 	LispFunctions.metafun = LispSexp.METAFUN
+	
+	LispFunctions.metacall = function (f, environ, rest)
+		return f.fun(environ, rest)
+	end
 	
 	LispFunctions.idstring = function (ident) return ident.ident end
 	

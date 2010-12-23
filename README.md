@@ -17,6 +17,7 @@ and then the functions defined there will integrate seamslessly with lua functio
 2. Error capturing -- DONE 
 3. Handle multiple return values to/from lua functions gracefully -- DONE
 4. BUG: Lambda doesn't play nice with negative numbers -- FIXED, TURNS OUT ALL OF LUAISP DIDN'T
+5. BECOME MORE CONSISTENT ABOUT WHEN YOU DO AND DON'T ALLOW MUTLIPLE STATEMENTS :P
 
 ### And other stuff ###
 4. ???
