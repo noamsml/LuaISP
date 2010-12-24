@@ -328,6 +328,11 @@ local function pkg_init(LispFunctions)
 		end
 	end
 	
+	
+	LispFunctions["exec-environ"] = function(expr, environ)
+		return LispExecutor.exec(expr, environ)
+	end
+	
 	-- Yes, it's a metafunction; blame the use of environ
 	LispFunctions.exec = LispSexp.METAFUN( function (environ, rest) 
 		--Yo dawg, I heard you like evaluation, so I put evaluation in your evaluation so you can
@@ -335,11 +340,16 @@ local function pkg_init(LispFunctions)
 		return LispExecutor.exec(LispExecutor.exec(rest.car, environ), environ)
 	end )
 	
-	LispFunctions.apply = LispSexp.METAFUN(function (environ,rest) 
-		return LispExecutor.apply(LispExecutor.exec(rest.car,environ), 
-			LispExecutor.exec(rest.cdr.car, environ), environ)
-	end)
-	
+	LispFunctions.apply = function (func, vals)
+		local unpack_list
+		unpack_list = function (list)
+			if list then
+				return list.car, unpack_list(list.cdr)
+			end
+		end
+		
+		return func(unpack_list(vals))
+	end	
 	LispFunctions.metafun = LispSexp.METAFUN;
 	
 	LispFunctions[":"] = function(a,b)
@@ -386,6 +396,14 @@ local function pkg_init(LispFunctions)
 	end
 	
 	LispFunctions.idstring = function (ident) return ident.ident end
+	
+	--quick 'n dirty
+	LispFunctions.printlines = function (sexp)
+		if sexp then
+			print(LispFunctions.display(sexp.car))
+			LispFunctions.printlines(sexp.cdr)
+		end
+	end
 	
 	setmetatable(LispFunctions, {__index = getfenv(1)});
 end

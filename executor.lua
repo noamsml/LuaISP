@@ -4,7 +4,6 @@ local LispParser = import "parser" --yay redundancy
 local LispFunctions = import "functions"
 local LispSexp = import "Sexp"
 
-
 local function pkg_init(LispExecutor)
 
 	LispExecutor.exec = function (sexp, environ)
@@ -15,8 +14,22 @@ local function pkg_init(LispExecutor)
 				--print (subenv, finalstep)
 				return get()
 			elseif LispSexp.is_sexp(sexp) then
-				func = LispExecutor.exec(sexp.car, environ)
-				return LispExecutor.apply(func, sexp.cdr, environ)
+				
+				
+				local success, func, rval
+				success, func = pcall(LispExecutor.exec, sexp.car, environ)
+				if not success then
+					error("In functional expression " .. LispFunctions.display(sexp.car) .. ":: \n" .. tostring(func))
+				end
+				
+				
+				success, rval =  pcall(LispExecutor.apply, func, sexp.cdr, environ, hist)
+				if not success then
+					error("In expression " .. LispFunctions.display(sexp) .. ":: \n" .. tostring(rval))
+				end
+				
+				
+				return rval
 			else
 				return sexp
 			end
@@ -75,7 +88,9 @@ local function pkg_init(LispExecutor)
 	
 
 
-
+	-- Fair warning: This has nothing to do with real lisp's "apply" function :P
+	-- I can't really change the way things work because it would break
+	-- meta-functions
 	LispExecutor.apply = function (expr, rest, environ)
 				if type(expr) == "function" then
 					return  expr(massexec(rest, environ))
@@ -86,9 +101,9 @@ local function pkg_init(LispExecutor)
 				end
 			end 
 
-	massexec = function (expr, environ)
+	massexec = function (expr, environ, hist)
 		if expr then
-			return LispExecutor.exec(expr.car,environ), massexec(expr.cdr, environ)
+			return LispExecutor.exec(expr.car,environ, hist), massexec(expr.cdr, environ)
 		end
 	end
 	

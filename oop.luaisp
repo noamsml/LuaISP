@@ -1,14 +1,24 @@
 
 
+
 (setl class (metafun (lambda (environ rest)
 	
 	
-	(set rval (newtable))
-	
-	
+	(set rval (newtable))	
 	(set methods (cdr rest))
-	(set myenv (newenv environ))
+	(set nilenv (newenv environ))
 	
+	(set exec-list (lambda (f l)
+		(if l
+			(cons (f (car l)) (exec-list f (cdr l)))
+			nil
+		)
+	))
+	
+	(set dtr (lambda (val)
+		(print (display val))
+		val
+	))
 	
 
 	(while methods
@@ -18,14 +28,16 @@
 			(if (eqv (car (car methods)) 'method)
 				(do
 					(:= rval (car (car (cdr (car methods))))
-						(metacall lambda myenv 
+						(metacall lambda environ 
 							(cons (cons 'self (cdr (car (cdr (car methods))))) (cdr (cdr (car methods))) )
 						)
 					)
 				)
 				
 				(if (eqv (car (car methods)) 'superclass)
-					(set rval.__superclass__ (cdr (cdr (car methods))) )
+					
+					(set rval.__superclass__ (exec-list (lambda (expr) (exec-environ expr nilenv)) (cdr (car methods)) )) 
+					
 					(error "Only methods are allowed in class body")
 				)
 			)
@@ -50,7 +62,7 @@
 		(if (not (eq cl.__superclass__ nil))
 			(do 
 				(set souper (apply instance cl.__superclass__))
-				(set rvalmeta.__index (lamdba (t i) (if (eq (: cl i) nil) (: cl i) (: souper i))))
+				(set rvalmeta.__index (lambda (t i) (if (eq (: cl i) nil) (: souper i) (: cl i))))
 			)
 			(set rvalmeta.__index cl)
 		)
